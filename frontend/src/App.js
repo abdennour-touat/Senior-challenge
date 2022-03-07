@@ -5,6 +5,7 @@ import { Landing } from "./pages/Landing";
 import PickAvatar from "./pages/PickAvatar";
 import { CreateRoom } from "./pages/CreateRoom";
 import GameRoom from "./pages/GameRoom";
+import GuestRoom from "./pages/GuestRoom";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <div>
           <Header />
           <Routes>
+            <Route path="/guestRoom" element={<GuestRoom />} />
             <Route path="/gameRoom" element={<GameRoom />} />
             <Route path="/createRoom" element={<CreateRoom />} />
             <Route path="/" element={<Landing />} />

@@ -1,34 +1,63 @@
-import { createSlice } from "@reduxjs/toolkit";
-
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import playerService from "./playerService";
 const initialState = {
   name: "",
-  avatar: 1,
-  room: {
-    roomName: "",
-    roomRounds: 1,
-  },
+  id: "",
 };
+export const createPlayer = createAsyncThunk(
+  "/player/create",
+  async (name, thunkAPI) => {
+    try {
+      return await playerService.createPlayer(name);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+export const getPlayer = createAsyncThunk(
+  "/player/get",
+  async (id, thunkAPI) => {
+    try {
+      return await playerService.getPlayer(id);
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString();
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
 
 export const playerSlice = createSlice({
   name: "player",
   initialState,
   reducers: {
     reset: () => initialState,
-    addName: (state, action) => {
-      state.name = action.payload;
+    addPlayer: (state, action) => {
+      state.name = action.payload.name;
+      state.id = action.payload.id;
     },
-    addAvatar: (state, action) => {
-      state.avatar = action.payload;
-    },
-    addRounds: (state, action) => {
-      state.room.roomRounds = action.payload;
-    },
-    addRoomName: (state, action) => {
-      state.room.roomName = action.payload;
-    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(createPlayer.fulfilled, (state, action) => {
+        state.name = action.payload.name;
+        state.id = action.payload._id;
+      })
+      .addCase(getPlayer.fulfilled, (state, action) => {
+        state = action.payload;
+      });
   },
 });
 
-export const { reset, addName, addAvatar, addRoomName, addRounds } =
-  playerSlice.actions;
+export const { reset, addPlayer } = playerSlice.actions;
 export default playerSlice.reducer;

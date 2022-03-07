@@ -1,38 +1,28 @@
 import { useEffect, useRef, useState } from "react";
 import girl from "../assets/girl.svg";
-import Modal from "@material-tailwind/react/Modal";
-import ModalBody from "@material-tailwind/react/ModalBody";
 import purple from "../assets/purple.svg";
 import bald from "../assets/bald.svg";
 import io from "socket.io-client";
 import { useDispatch, useSelector } from "react-redux";
-import randomWords from "random-words";
 import CanvasDraw from "react-canvas-draw";
 import { useNavigate } from "react-router-dom";
-import { setword } from "../features/player/roomSlice";
-const GameRoom = () => {
+
+const GuestRoom = () => {
   const [avatars, setAvatars] = useState([purple, bald, girl, bald]);
-  const [color, setColor] = useState("#000000");
+
   const canvasRef = useRef(null);
-  const canvas = canvasRef.current;
   const [boardData, setBoardData] = useState({});
   const room = useSelector((state) => state.room);
   const player = useSelector((state) => state.player);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [showModal, setShowModal] = useState(true);
   const socket = io.connect("http://localhost:8000", {
     withCredentials: true,
     extraHeaders: {
       "my-custom-header": "abcd",
     },
   });
-  let words = "";
-  words = randomWords(4);
   useEffect(() => {
-    if (player.id !== room.host) {
-      setShowModal(false);
-    }
     if (!player.name) {
       navigate("/");
     }
@@ -50,29 +40,6 @@ const GameRoom = () => {
 
   return (
     <>
-      <Modal size="xl" active={showModal}>
-        <ModalBody>
-          <div
-            className="  flex content-center
-          "
-          >
-            {words.map((word) => {
-              return (
-                <button
-                  onClick={() => {
-                    dispatch(setword(word));
-                    setShowModal(false);
-                  }}
-                >
-                  <h3 className=" m-6 bg-gr rounded p-4" key={word.length}>
-                    {word}
-                  </h3>
-                </button>
-              );
-            })}
-          </div>
-        </ModalBody>
-      </Modal>
       <div className=" h-full">
         <div className="flex justify-between mx-4 border-2 bg-gr">
           <div className=" flex-1 ">
@@ -111,12 +78,11 @@ const GameRoom = () => {
                   }, 1000);
                 }
               }}
+              disabled={true}
               saveData={player.id !== room.host ? boardData : null}
               ref={canvasRef}
               canvasWidth={1000}
               canvasHeight={window.screen.height / 1.5}
-              brushRadius={2}
-              brushColor={color}
             />
 
             <div className=" w-3/12  bg-gr basis-1/4 border-2 "> </div>
@@ -129,20 +95,10 @@ const GameRoom = () => {
           >
             {room.word}
           </div>
-
-          <div className="text-center basis-11/12 bg-gr border-2">
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
-            <button onClick={() => canvas.undo()}>delete</button>
-            <button onClick={() => canvas.clear()}>deleteAll</button>
-          </div>
         </div>
       </div>
     </>
   );
 };
 
-export default GameRoom;
+export default GuestRoom;

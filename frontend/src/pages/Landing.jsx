@@ -3,12 +3,14 @@ import title from "../assets/Rectangle 12.svg";
 import { Progress } from "../components/Progress";
 import StepBar from "../components/StepBar";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addName } from "../features/player/playerSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { createPlayer, addPlayer } from "../features/player/playerSlice";
+import { useEffect } from "react";
 
 export const Landing = () => {
   let arr = [1, 0, 0];
   let dispatch = useDispatch();
+  const { name } = useSelector((state) => state.player);
   const navigate = useNavigate();
   const [player, setName] = useState("");
 
@@ -16,10 +18,17 @@ export const Landing = () => {
     setName(e.target.value);
   };
 
+  useEffect(() => {
+    if (name) {
+      navigate("/avatar");
+    }
+    if (localStorage.getItem("player")) {
+      dispatch(addPlayer(JSON.parse(localStorage.getItem("player"))));
+    }
+  }, [dispatch, name, navigate]);
   const typeName = (e) => {
     e.preventDefault();
-    dispatch(addName(player));
-    navigate("/avatar");
+    dispatch(createPlayer(player));
   };
 
   return (

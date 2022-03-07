@@ -4,26 +4,27 @@ import purple from "../assets/purple.svg";
 import bald from "../assets/bald.svg";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addAvatar } from "../features/player/playerSlice";
+import { addAvatar, addRounds } from "../features/player/roomSlice";
 import { useNavigate } from "react-router-dom";
+import { getRoom } from "../features/player/roomSlice";
 const PickAvatar = () => {
   let arr = [1, 2, 0];
-  const player = useSelector((state) => state.player);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [avatars, setAvatars] = useState([purple, bald, girl]);
-
+  const [guestCode, setGuestCode] = useState("");
   const [rounds, setRounds] = useState(1);
-  const [roomCode, setRoomCode] = useState("");
-  const change = (e) => {
-    setRoomCode(e.target.value);
-  };
+  const player = useSelector((state) => state.player);
+  const room = useSelector((state) => state.room);
 
   useEffect(() => {
     if (!player.name) {
       navigate("/");
     }
-  }, [navigate, player]);
+    if (room.roomName) {
+      navigate("/gameRoom");
+    }
+  }, [navigate, player, room.roomName]);
 
   const pickThis = (avatar) => {
     return () => {
@@ -39,7 +40,12 @@ const PickAvatar = () => {
       }
     };
   };
+  const enterRoom = () => {
+    dispatch(getRoom(guestCode));
+    navigate("/guestRoom");
+  };
   dispatch(addAvatar(avatars[1]));
+  dispatch(addRounds(rounds));
 
   return (
     <div className=" ">
@@ -63,9 +69,16 @@ const PickAvatar = () => {
       <h2 className="text-center">{player.name}</h2>
 
       <div className="flex justify-center mt-11">
-        <button className=" bg-fg1 w-96 h-16 border-x-4 border-y-8 border-fg2 focus:outline-none text-center mx-2.5 ">
+        <input
+          className=" bg-fg1 w-96 h-16 border-x-4 border-y-8 border-fg2 focus:outline-none text-center mx-2.5 "
+          type="text"
+          value={guestCode}
+          onChange={(e) => setGuestCode(e.target.value)}
+          placeholder="ROOM CODE"
+        />
+        {/* <button className=" bg-fg1 w-96 h-16 border-x-4 border-y-8 border-fg2 focus:outline-none text-center mx-2.5 ">
           ROOM CODE
-        </button>
+        </button> */}
         <button
           onClick={() => {
             navigate("/createroom");
@@ -92,12 +105,17 @@ const PickAvatar = () => {
           </div>
           <button
             className=" bg-fg1 w-14  h-16 border-x-4 border-y-8 border-fg2 focus:outline-none text-center  mx-2.5"
-            onClick={() => (rounds < 8 ? setRounds(rounds + 1) : setRounds(8))}
+            onClick={() =>
+              rounds < 20 ? setRounds(rounds + 1) : setRounds(20)
+            }
           >
             +
           </button>
         </div>
-        <button className="bg-fg2 h-8 w-20 border-4  focus:outline-none text-center  mx-2.5">
+        <button
+          onClick={enterRoom}
+          className="bg-fg2 h-8 w-20 border-4  focus:outline-none text-center  mx-2.5"
+        >
           -&gt;
         </button>
       </div>

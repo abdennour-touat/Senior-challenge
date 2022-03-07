@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import StepBar from "../components/StepBar";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addRoomName } from "../features/player/playerSlice";
-import createRoom from "../assets/create room.svg";
-
+import { useDispatch, useSelector } from "react-redux";
+import { createRoom } from "../features/player/roomSlice";
+import roomCreate from "../assets/create room.svg";
 export const CreateRoom = () => {
   let arr = [1, 2, 0];
   let dispatch = useDispatch();
+  const player = useSelector((state) => state.player);
+  const room = useSelector((state) => state.room);
+
   const navigate = useNavigate();
   const [name, setName] = useState("");
 
@@ -17,10 +19,22 @@ export const CreateRoom = () => {
 
   const typeName = (e) => {
     e.preventDefault();
-    dispatch(addRoomName(name));
-    navigate("/gameRoom");
+    dispatch(
+      createRoom({
+        host: player.id,
+        roomName: name,
+        roomRounds: room.roomRounds,
+      })
+    );
   };
-
+  useEffect(() => {
+    if (!player.name) {
+      navigate("/");
+    }
+    if (room.roomName) {
+      navigate("/gameRoom");
+    }
+  }, [navigate, player, room.roomName]);
   return (
     <div className=" ">
       <div className=" flex justify-center mt-14">
@@ -29,7 +43,7 @@ export const CreateRoom = () => {
         })}
       </div>
       <img
-        src={createRoom}
+        src={roomCreate}
         alt="create room"
         className=" w-6/12 mx-auto mt-24 mb-24"
       />
